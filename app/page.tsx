@@ -23,7 +23,6 @@ export default function Home() {
   // }, []);
   return (
     <div className="min-h-screen bg-black text-zinc-50 font-sans selection:bg-indigo-500/30">
-      <Navbar />
       <main>
         <HeroSection />
         <FeaturesSection />
