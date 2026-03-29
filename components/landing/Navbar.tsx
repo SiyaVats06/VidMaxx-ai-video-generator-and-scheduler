@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Video, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +23,7 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-8">
             <Link
-              href="#features"
+              href="/features"
               className="text-zinc-300 hover:text-white transition-colors text-sm font-medium"
             >
               Features
@@ -42,16 +43,17 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-zinc-300 hover:text-white transition-colors text-sm font-medium"
-            >
-              Log in
-            </Link>
-
-            <button className="bg-white text-black hover:bg-zinc-200 transition-colors px-4 py-2 rounded-full text-sm font-medium">
-              Get Started
-            </button>
+            <Show when="signed-out">
+              <SignInButton />
+              <SignUpButton>
+                <button className="bg-[#6c47ff] text-white rounded-full font-medium text-sm sm:text-base h-8  px-4 sm:px-5 cursor-pointer">
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
           </div>
 
           <div className="md:hidden flex items-center">
