@@ -5,10 +5,18 @@ import Link from "next/link";
 import { Video, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import {
+  Show,
+  SignInButton,
+  SignUpButton,
+  useAuth,
+  UserButton,
+} from "@clerk/nextjs";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { userId } = useAuth();
+  console.log("userID in Navbar", userId);
 
   return (
     <nav className="fixed w-full z-50 top-0 border-b border-white/10 bg-black/60 backdrop-blur-md">
@@ -52,6 +60,11 @@ export default function Navbar() {
               </SignUpButton>
             </Show>
             <Show when="signed-in">
+              <Link href="/dashboard">
+                <button className="bg-[#6c47ff] text-white rounded-md font-medium text-sm sm:text-base h-8  px-4 sm:px-5 cursor-pointer">
+                  Dashboard
+                </button>
+              </Link>
               <UserButton />
             </Show>
           </div>

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function syncUser(
   eventType: string,
@@ -6,10 +6,8 @@ export async function syncUser(
   userData: any,
 ) {
   try {
-    const supabase = await createClient();
-
     if (eventType === "user.created") {
-      const { data, error } = await supabase.from("users").insert({
+      const { data, error } = await supabaseAdmin.from("users").insert({
         user_id: userId,
         name: userData.first_name,
         email: userData.email_addresses[0].email_address,
@@ -19,7 +17,7 @@ export async function syncUser(
         return { error: error.message };
       }
     } else if (eventType === "user.deleted") {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from("users")
         .delete()
         .eq("user_id", userId);

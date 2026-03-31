@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       `Received webhook with ID ${id} and event type of ${eventType}`,
     );
     console.log("Webhook payload:", evt.data);
-    syncUser(eventType, id, evt.data);
+    await syncUser(eventType, id, evt.data);
 
     return new Response("Webhook received", { status: 200 });
   } catch (err) {
