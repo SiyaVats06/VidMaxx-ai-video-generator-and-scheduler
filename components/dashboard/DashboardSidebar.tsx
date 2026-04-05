@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutGrid,
@@ -11,151 +10,142 @@ import {
   CreditCard,
   Settings,
   Zap,
-  User,
   Plus,
-  ChevronRight,
 } from "lucide-react";
-import { clsx } from "clsx";
+import { cn } from "@/lib/utils";
+import { Button } from "@base-ui/react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useUser } from "@clerk/nextjs";
 
-const navItems = [
-  {
-    label: "Series",
-    href: "/dashboard/series",
-    icon: LayoutGrid,
-  },
-  {
-    label: "Videos",
-    href: "/dashboard/videos",
-    icon: Video,
-  },
-  {
-    label: "Guides",
-    href: "/dashboard/guides",
-    icon: BookOpen,
-  },
-  {
-    label: "Billing",
-    href: "/dashboard/billing",
-    icon: CreditCard,
-  },
-  {
-    label: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
+type NavItem = {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  badge?: string;
+  href: string;
+};
+
+// ── Constants ──────────────────────────────────────────────────────────
+const NAV_ITEMS: NavItem[] = [
+  { id: "series", label: "Series", icon: LayoutGrid, href: "/dashboard" },
+  { id: "videos", label: "Videos", icon: Video, badge: "12", href: "/dashboard/videos" },
+  { id: "guides", label: "Guides", icon: BookOpen, href: "/dashboard/guides" },
+  { id: "billing", label: "Billing", icon: CreditCard, href: "/dashboard/billing" },
+  { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/settings" },
 ];
 
 export default function DashboardSidebar() {
-  const pathname = usePathname();
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const { user } = useUser();
+  const [activeNav, setActiveNav] = useState<string>("series");
 
   return (
-    <aside className="dashboard-sidebar">
-      {/* ── Sidebar Header ── */}
-      <div className="sidebar-header">
-        <div className="sidebar-brand">
-          <div className="sidebar-logo-wrapper">
-            <Image
-              src="/logo.png"
-              alt="VidMaxx Logo"
-              width={34}
-              height={34}
-              className="sidebar-logo"
-              priority
-            />
+    <aside className="w-[228px] shrink-0 z-100 flex flex-col bg-white border-r border-gray-200">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 px-5 h-16 border-b border-gray-200">
+        <div className="flex items-center gap-2 w-full">
+          <div className="bg-indigo-600 text-white rounded-md p-1.5 flex items-center justify-center">
+            <Video className="w-5 h-5" />
           </div>
-          <span className="sidebar-app-name">VidMaxx</span>
+          <Link
+            href="/"
+            className="text-zinc-900 transition-colors text-xl font-bold tracking-tight"
+          >
+            VidMaxx
+          </Link>
         </div>
       </div>
 
-      {/* ── Create Button ── */}
-      <div className="sidebar-create-btn-wrapper">
-        <button className="sidebar-create-btn" id="create-series-btn">
-          <Plus size={15} strokeWidth={2.5} />
-          <span>Create new series</span>
-        </button>
-      </div>
+      {/* Create Button */}
+      <Link href="/dashboard/create" className="px-3.5 pt-4 pb-2">
+        <Button className="w-full h-10 flex justify-center items-center cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-medium rounded-lg gap-2 transition-all shadow-sm">
+          <Plus className="w-4 h-4" />
+          <span>Create New Series</span>
+        </Button>
+      </Link>
 
-      {/* ── Navigation ── */}
-      <nav className="sidebar-nav">
-        <p className="sidebar-nav-label">Menu</p>
-        <ul className="sidebar-nav-list">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            const isHovered = hoveredItem === item.label;
+      {/* Nav label */}
+      <p className="px-5 pt-3 pb-2 text-[11px] font-semibold tracking-widest uppercase text-zinc-400">
+        Menu
+      </p>
 
-            return (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  id={`nav-${item.label.toLowerCase()}`}
-                  className={clsx("sidebar-nav-item", {
-                    "sidebar-nav-item--active": isActive,
-                    "sidebar-nav-item--hover": !isActive && isHovered,
-                  })}
-                  onMouseEnter={() => setHoveredItem(item.label)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <span
-                    className={clsx("sidebar-nav-icon-wrapper", {
-                      "sidebar-nav-icon-wrapper--active": isActive,
-                    })}
-                  >
-                    <Icon
-                      size={16}
-                      strokeWidth={isActive ? 2.2 : 1.8}
-                      className={clsx("sidebar-nav-icon", {
-                        "sidebar-nav-icon--active": isActive,
-                      })}
-                    />
-                  </span>
-                  <span className="sidebar-nav-text">{item.label}</span>
-                  {isActive && (
-                    <ChevronRight
-                      size={13}
-                      className="sidebar-nav-chevron"
-                      strokeWidth={2}
-                    />
+      {/* Nav Items */}
+      <nav className="flex-1 px-3 space-y-1">
+        {NAV_ITEMS.map(({ id, label, icon: Icon, badge, href }) => {
+          const isActive = activeNav === id;
+          return (
+            <Link
+              key={id}
+              href={href}
+              onClick={() => setActiveNav(id)}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] transition-all group",
+                isActive
+                  ? "bg-indigo-50 text-indigo-700 font-semibold"
+                  : "text-zinc-600 hover:bg-gray-100 hover:text-zinc-900 font-medium",
+              )}
+            >
+              <Icon
+                className={cn(
+                  "w-[18px] h-[18px] shrink-0 transition-colors",
+                  isActive
+                    ? "text-indigo-600"
+                    : "text-zinc-400 group-hover:text-zinc-600",
+                )}
+              />
+              <span className="flex-1 text-left">{label}</span>
+              {badge && (
+                <span
+                  className={cn(
+                    "text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center",
+                    isActive
+                      ? "bg-indigo-100 text-indigo-700"
+                      : "bg-gray-100 text-zinc-500 group-hover:bg-gray-200",
                   )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                >
+                  {badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* ── Sidebar Footer ── */}
-      <div className="sidebar-footer">
+      {/* Sidebar Footer */}
+      <div className="px-3 pb-4 space-y-2 border-t border-gray-200 pt-4">
         {/* Upgrade Card */}
-        <div className="sidebar-upgrade-card" id="upgrade-card">
-          <div className="sidebar-upgrade-icon-ring">
-            <Zap size={14} className="sidebar-upgrade-icon" />
+        <div className="mb-3 rounded-xl bg-gradient-to-br from-orange-50 to-white p-4 shadow-sm border border-orange-100/50">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="w-4 h-4 text-orange-500 fill-orange-500" />
+            <span className="text-[13px] font-bold tracking-wide text-gray-900">
+              Upgrade Plan
+            </span>
           </div>
-          <div className="sidebar-upgrade-text">
-            <p className="sidebar-upgrade-title">Upgrade to Pro</p>
-            <p className="sidebar-upgrade-sub">Unlock all AI features</p>
-          </div>
-          <button className="sidebar-upgrade-btn" id="upgrade-btn">
-            Upgrade
-          </button>
+          <p className="text-[12px] text-gray-600 mb-3 leading-snug">
+            Unlock analytics, custom domains & more.
+          </p>
+          <Button className="w-full h-8 bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 text-[12px] font-semibold rounded-lg transition-colors shadow-sm">
+            View Plans
+          </Button>
         </div>
 
-        {/* Profile Setting */}
-        <Link
-          href="/dashboard/settings/profile"
-          id="nav-profile-settings"
-          className="sidebar-profile-link"
-        >
-          <div className="sidebar-profile-avatar">
-            <User size={14} strokeWidth={2} className="sidebar-profile-user-icon" />
+        {/* Profile */}
+        <button className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-100 transition-all group border border-transparent">
+          <Avatar className="w-8 h-8 shrink-0 border border-gray-200 shadow-sm">
+            <AvatarImage src="/user-logo.png" alt="User" />
+            <AvatarFallback className="bg-emerald-100 text-emerald-800 text-[12px] font-bold">
+              {user?.firstName?.charAt(0) || "U"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 text-left min-w-0">
+            <p className="text-[13px] font-semibold text-zinc-900 truncate">
+              Profile Settings
+            </p>
+            <p className="text-[11px] text-zinc-500 truncate">
+              {user?.emailAddresses[0]?.emailAddress || "Manage Account"}
+            </p>
           </div>
-          <div className="sidebar-profile-info">
-            <p className="sidebar-profile-name">My Profile</p>
-            <p className="sidebar-profile-sub">Account settings</p>
-          </div>
-          <ChevronRight size={13} className="sidebar-profile-chevron" strokeWidth={2} />
-        </Link>
+          <Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 shrink-0 transition-colors" />
+        </button>
       </div>
     </aside>
   );
